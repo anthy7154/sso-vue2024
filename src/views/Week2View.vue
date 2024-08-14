@@ -20,9 +20,17 @@
     Token: {{ signInRes }}
   </div>
 
-  <h1>驗證</h1>
-  <input type="text" placeholder="Token">
-  <button type="button">Check Out</button>
+  <div>
+    <h1>驗證</h1>
+    <div v-if="user.uid">
+      <p>UID: {{ user.uid }}</p>
+      <p>Nickname: {{ user.nickname }}</p>
+    </div>
+    <div v-else>
+      你還沒有登入哦
+    </div>
+  </div>
+
 
   <h1>登出</h1>
   <input type="text" placeholder="Token">
@@ -32,7 +40,7 @@
 
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const api = "https://todolist-api.hexschool.io"
 
@@ -77,10 +85,39 @@ const signIn = async () => {
     );
     console.log(res);
     signInRes.value = res.data.token;
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.cookie = `hexschoolTodo=${res.data.token}; expires=${tomorrow.toUTCString()}`;
+
   } catch (error) {
     console.log(error)
   }
 }
+
+const user = ref({
+  nickname: '',
+  uid: ''
+})
+
+onMounted(async () => {
+
+  const token = document.cookie.replace(
+    /(?:(?:^|.*;\s*)hexschoolTodo\s*=\s*([^;]*).*$)|^.*$/,
+    "$1",
+  );
+
+  console.log(token)
+
+  const res = await axios.get(`${api}/users/checkout`, {
+    headers: {
+      authorization: token
+    }
+  });
+  console.log(res);
+
+  user.value = res.data
+})
 
 </script>
 
