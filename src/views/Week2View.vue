@@ -1,57 +1,64 @@
 <template>
-  <div>
-    <h2>註冊</h2>
-    <input type="email" placeholder="Email" v-model="signupField.email">
-    <input type="password" placeholder="Password" v-model="signupField.password">
-    <input type="text" placeholder="Nickname" v-model="signupField.nickname">
-    <!-- {{ signupField }} -->
-    <button type="button" @click="signup">Sign Up</button>
-    <p>{{ signupRes }}</p>
-  </div>
+  <div class="container">
+    <div class="row p-5">
+      <div class="col-6">
+        <div>
+          <h2>註冊</h2>
+          <input class="input-group" type="email" placeholder="Email" v-model="signupField.email">
+          <input class="input-group" type="password" placeholder="Password" v-model="signupField.password">
+          <input class="input-group" type="text" placeholder="Nickname" v-model="signupField.nickname">
+          <!-- {{ signupField }} -->
+          <button type="button" class="btn btn-secondary" @click="signup">Sign Up</button>
+          <p class="fw">{{ signupRes }}</p>
+        </div>
 
-  <div>
-    <h2>登入</h2>
-    <input type="email" placeholder="Email" v-model="signInField.email">
-    <input type="password" placeholder="Password" v-model="signInField.password">
-    <!-- {{ signInField }} -->
-    <button type="button" @click="signIn">Sign In</button>
-    <p>{{ signInRes }}</p>
-  </div>
+        <div>
+          <h2>登入</h2>
+          <input class="input-group" type="email" placeholder="Email" v-model="signInField.email">
+          <input class="input-group" type="password" placeholder="Password" v-model="signInField.password">
+          <!-- {{ signInField }} -->
+          <button type="button" class="btn btn-secondary" @click="signIn">Sign In</button>
+          <p>{{ signInRes }}</p>
+        </div>
 
-  <div>
-    <h2>驗證</h2>
-    <input type="text" placeholder="Token" v-model="tokenCheckout">
-    {{ tokenCheckout }}
-    <button type="button" @click="checkout">Checkout</button>
-    <p>{{ checkoutRes }}</p>
-  </div>
+        <div>
+          <h2>驗證</h2>
+          <input class="input-group" type="text" placeholder="Token" v-model="tokenCheckout">
+          <p class="fw" style="word-break: break-all;">{{ tokenCheckout }}</p>
+          <button type="button" class="btn btn-secondary" @click="checkout">Checkout</button>
+          <p class="fw">{{ checkoutRes }}</p>
+        </div>
 
 
-  <div>
-    <h2>登出</h2>
-    <input type="text" placeholder="Token" v-model="tokenSignOut">
-    <button type="button" @click="signOut">Sign Out</button>
-    <p>{{ signOutRes }}</p>
-  </div>
+        <div>
+          <h2>登出</h2>
+          <input class="input-group" type="text" placeholder="Token" v-model="tokenSignOut">
+          <button type="button" class="btn btn-secondary" @click="signOut">Sign Out</button>
+          <p>{{ signOutRes }}</p>
+        </div>
+      </div>
 
-  <hr>
-  <h2>Todo-List</h2>
-  <div v-if="token">
-    <input type="text" placeholder="New Todo" v-model="newTodo">
-    <button type="button" @click="addTodo">Add todo</button>
-    <div>
-      <ul v-for="(todo) in todos" v-bind:key="todo.id">
-        <li>
-          任務內容：{{ todo.content }} | 狀態：{{ todo.status ? "完成" : "未完成" }} |
-          <input type="text" v-model="todoEdit[todo.id]" placeholder="edit content">
-          <button type="button" @click="deleteTodo">Delete</button>
-          <button type="button" @click="updateTodo(todo.id)">Update</button>
-          <button type="button" @click="toggleTodoStatus">Toggle Status</button>
-        </li>
-        <!-- | <input type="text" v-model="tod"> -->
-      </ul>
+      <div class="col-6">
+        <h2>Todo-List</h2>
+        <div v-if="token">
+          <input class="input-group" type="text" placeholder="New Todo" v-model="newTodo">
+          <button type="button" class="btn btn-secondary" @click="addTodo">Add todo</button>
+          <div>
+            <ul v-for="(todo) in todos" v-bind:key="todo.id">
+              <li>
+                任務內容：{{ todo.content }} | 狀態：{{ todo.status ? "完成" : "未完成" }} |
+                <input class="input-group" type="text" v-model="todoEdit[todo.id]" placeholder="edit content">
+                <button type="button" class="btn btn-secondary" @click="deleteTodo(todo.id)">Delete</button>
+                <button type="button" class="btn btn-secondary" @click="updateTodo(todo.id)">Update</button>
+                <button type="button" class="btn btn-secondary" @click="toggleTodoStatus(todo.id)">Toggle Status</button>
+              </li>
+              <!-- | <input class="input-group" type="text" v-model="tod"> -->
+            </ul>
+          </div>
+
+        </div>
+      </div>
     </div>
-
   </div>
 
 </template>
@@ -225,13 +232,13 @@ const addTodo = async () => {
 
 // 修改 todo ==============================
 const todoEdit = ref({});
-
 const updateTodo = async (todoId) => {
   try {
     // const todo = todos.value.find((todo) => todo.id === todoId);
     // todo.content = todoEdit.value[todoId];
     // const updateTodoRes = await axios.put(`${api}/todos/${todoId}`, todo,
-    const updateTodoRes = await axios.put(`${api}/todos/${todoId}`,
+
+    await axios.put(`${api}/todos/${todoId}`,
       {
         content: todoEdit.value[todoId]
       }, {
@@ -239,9 +246,40 @@ const updateTodo = async (todoId) => {
         authorization: token.value
       }
     })
-    console.log(updateTodoRes)
+    // console.log(updateTodoRes)
 
     todoEdit.value[todoId] = ""
+    getTodos()
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// 刪除 todo ==============================
+const deleteTodo = async (todoId) => {
+  try {
+    await axios.delete(`${api}/todos/${todoId}`, {
+      headers: {
+        authorization: token.value
+      }
+    })
+    getTodos()
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// 更新 todo 狀態 ==============================
+const toggleTodoStatus = async (todoId) => {
+  try {
+    await axios.patch(`${api}/todos/${todoId}/toggle`, {},
+      {
+        headers: {
+          authorization: token.value
+        }
+      })
     getTodos()
 
   } catch (error) {
@@ -263,8 +301,6 @@ onMounted(() => {
     getTodos()
   }
 });
-
-
 
 </script>
 
