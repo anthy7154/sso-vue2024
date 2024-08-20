@@ -21,11 +21,9 @@
   <div>
     <h2>驗證</h2>
     <input type="text" placeholder="Token" v-model="tokenCheckout">
+    {{ tokenCheckout }}
     <button type="button" @click="checkout">Checkout</button>
-    <div v-if="user">
-      <p>UID: {{ user.uid }}</p>
-      <p>NICKNAME: {{ user.nickname }}</p>
-    </div>
+    <p>{{ checkoutRes }}</p>
   </div>
 
 
@@ -42,9 +40,16 @@
     <input type="text" placeholder="New Todo" v-model="newTodo">
     <button type="button" @click="addTodo">Add todo</button>
     <div>
-      <!-- <ul v-for="(todo ) in todos" v-bind="">
-
-      </ul> -->
+      <ul v-for="(todo) in todos" v-bind:key="todo.id">
+        <li>
+          任務內容：{{ todo.content }} | 狀態：{{ todo.status ? "完成" : "未完成" }} |
+          <input type="text" v-model="todoEdit[todo.id]" placeholder="edit content">
+          <button type="button" @click="deleteTodo">Delete</button>
+          <button type="button" @click="updateTodo(todo.id)">Update</button>
+          <button type="button" @click="toggleTodoStatus">Toggle Status</button>
+        </li>
+        <!-- | <input type="text" v-model="tod"> -->
+      </ul>
     </div>
 
   </div>
@@ -57,7 +62,7 @@ import { onMounted, ref } from "vue";
 
 const api = "https://todolist-api.hexschool.io"
 
-// 註冊
+// 註冊 ==============================
 const signupField = ref({
   email: "",
   password: "",
@@ -81,15 +86,16 @@ const signup = async () => {
   }
 }
 
-// 登入
+// 登入 ==============================
 const signInField = ref({
   email: "",
   password: "",
 });
 
-const token = ref("")
+const token = ref("") // 登入後取得的 token
 const signInRes = ref("")
 
+// 登入後會回傳 token
 const signIn = async () => {
   try {
     // console.log(`${api}/users/sign_in`);
@@ -98,14 +104,13 @@ const signIn = async () => {
     );
     // console.log(res);
     signInRes.value = `登入成功, ${res.data.token}`;
+
+    // TODO
     token.value = res.data.token
 
-    // 將 token 存入 cookie
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    document.cookie = `hexschoolTodo=${res.data.token}; expires=${tomorrow.toUTCString()}`;
-
-    getTodos();
+    // tokenCheckout.value = res.data.token
+    // checkout()
+    // getTodos();
 
   } catch (error) {
     // console.log(error.message)
@@ -113,13 +118,11 @@ const signIn = async () => {
   }
 }
 
-// 驗證
-const user = ref({
-  nickname: '',
-  uid: ''
-});
-
+// 驗證 ==============================
 const tokenCheckout = ref("")
+const checkoutRes = ref("")
+
+// 使用登入後回傳的 token 去驗證，並存入 document.cookie
 const checkout = async () => {
   try {
     const res = await axios.get(`${api}/users/checkout`, {
@@ -129,20 +132,32 @@ const checkout = async () => {
     });
     console.log(res);
 
-    user.value = res.data
+    // user.value = res.data
+    checkoutRes.value = `驗證成功, UID: ${res.data.uid}, Nickname: ${res.data.nickname}`
+
+    // 將 token 存入 cookie
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.cookie = `hexschoolTodo=${tokenCheckout.value}; expires=${tomorrow.toUTCString()}`;
+
+    // 驗證成功後，將已驗證的 token 拿去執行 getTodos()
+    token.value = tokenCheckout.value
+    getTodos()
+
   } catch (error) {
     console.log(error.message)
+    checkoutRes.value = `驗證失敗, ${error.message}`
   }
 };
 
-// 登出
+// 登出 ==============================
+// signout 時，API 那端會將該組 cookie 失效，不能再用於 chekcout，如果一開始沒先過 checkout 就 signout 那會驗證不過 
+// 但失效的 cookie 還是能 signout 登出成功 (應該還存在伺服器)
 const tokenSignOut = ref("");
 const signOutRes = ref("");
 
 const signOut = async () => {
   try {
-    // console.log(`${api}/users/sign_out`);
-
     // url, data, headers
     const res = await axios.post(`${api}/users/sign_out`,
       {},
@@ -155,9 +170,8 @@ const signOut = async () => {
     signOutRes.value = res.data.message;
 
     tokenCheckout.value = ""
-    user.value = !user.value
-
-    // document.cookie.removeItem("hexschoolTodo");
+    tokenSignOut.value = ""
+    token.value = ""
 
   } catch (error) {
     console.log(error)
@@ -165,11 +179,11 @@ const signOut = async () => {
   }
 };
 
-// ToDo List
+// ToDo List ==============================
 const todos = ref([])
 const newTodo = ref("")
-// const todoEdit = ref("")
 
+// 取得所有 todos ==============================
 const getTodos = async () => {
   try {
     // console.log(todos.value)
@@ -179,23 +193,57 @@ const getTodos = async () => {
       }
     })
     // console.log(res.data)
-    todos.value = res.data
+    todos.value = res.data.data
+    // console.log("todos:", todos.value)
+
   } catch (error) {
     console.log(error)
   }
 }
 
+// 新增 todo ==============================
 const addTodo = async () => {
   try {
-    const res = await axios.post(`${api}/todos/`,
-      newTodo.value,
+    // console.log(newTodo.value)
+
+    await axios.post(`${api}/todos/`,
+      {
+        content: newTodo.value
+      },
       {
         headers: {
           authorization: token.value
         }
       })
-    console.log(res)
+    newTodo.value = ""
     getTodos()
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// 修改 todo ==============================
+const todoEdit = ref({});
+
+const updateTodo = async (todoId) => {
+  try {
+    // const todo = todos.value.find((todo) => todo.id === todoId);
+    // todo.content = todoEdit.value[todoId];
+    // const updateTodoRes = await axios.put(`${api}/todos/${todoId}`, todo,
+    const updateTodoRes = await axios.put(`${api}/todos/${todoId}`,
+      {
+        content: todoEdit.value[todoId]
+      }, {
+      headers: {
+        authorization: token.value
+      }
+    })
+    console.log(updateTodoRes)
+
+    todoEdit.value[todoId] = ""
+    getTodos()
+
   } catch (error) {
     console.log(error)
   }
