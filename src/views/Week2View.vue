@@ -1,62 +1,128 @@
 <template>
-  <div class="container">
+  <div class="container-sm">
     <div class="row p-5">
-      <div class="col-6">
-        <div>
-          <h2>註冊</h2>
-          <input class="input-group" type="email" placeholder="Email" v-model="signupField.email">
-          <input class="input-group" type="password" placeholder="Password" v-model="signupField.password">
-          <input class="input-group" type="text" placeholder="Nickname" v-model="signupField.nickname">
-          <!-- {{ signupField }} -->
-          <button type="button" class="btn btn-secondary" @click="signup">Sign Up</button>
-          <p class="fw">{{ signupRes }}</p>
-        </div>
+      <div class="col-6 border-end">
+        <form>
+          <h2 class="text-decoration-underline">註冊</h2>
+          <div class="mb-3">
+            <label for="signupInputEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="signupInputEmail" v-model="signupField.email">
+          </div>
 
-        <div>
-          <h2>登入</h2>
-          <input class="input-group" type="email" placeholder="Email" v-model="signInField.email">
-          <input class="input-group" type="password" placeholder="Password" v-model="signInField.password">
-          <!-- {{ signInField }} -->
-          <button type="button" class="btn btn-secondary" @click="signIn">Sign In</button>
-          <p>{{ signInRes }}</p>
-        </div>
+          <div class="mb-3">
+            <label for="signupInputPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="signupInputPassword" v-model="signupField.password">
+          </div>
 
-        <div>
-          <h2>驗證</h2>
-          <input class="input-group" type="text" placeholder="Token" v-model="tokenCheckout">
-          <p class="fw" style="word-break: break-all;">{{ tokenCheckout }}</p>
-          <button type="button" class="btn btn-secondary" @click="checkout">Checkout</button>
-          <p class="fw">{{ checkoutRes }}</p>
-        </div>
+          <div class="mb-3">
+            <label for="signupInputNickname" class="form-label">Nickname</label>
+            <input type="text" class="form-control" id="signupInputNickname" v-model="signupField.nickname">
+          </div>
 
+          <p class="text-black-50 text-break border border-primary p-2" v-if="signupRes">{{ signupRes }}</p>
+          <div class="mb-3 text-end">
+            <button type="button" class="btn btn-secondary" @click="signup">Sign Up</button>
+          </div>
+        </form>
 
-        <div>
-          <h2>登出</h2>
-          <input class="input-group" type="text" placeholder="Token" v-model="tokenSignOut">
-          <button type="button" class="btn btn-secondary" @click="signOut">Sign Out</button>
-          <p>{{ signOutRes }}</p>
-        </div>
+        <hr>
+
+        <form>
+          <h2 class="text-decoration-underline">登入</h2>
+          <div class="mb-3">
+            <label for="signInInputEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="signInInputEmail" v-model="signInField.email">
+          </div>
+
+          <div class="mb-3">
+            <label for="signInInputPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="signInInputPassword" v-model="signInField.password">
+          </div>
+
+          <p class="text-black-50 text-break border border-primary p-2" v-if="signInRes">{{ signInRes }}</p>
+          <div class="mb-3 text-end">
+            <button type="button" class="btn btn-secondary" @click="signIn">Sign In</button>
+          </div>
+        </form>
+
+        <hr>
+
+        <form>
+          <h2 class="text-decoration-underline">驗證</h2>
+          <div class="mb-3">
+            <label for="checkoutInputToken" class="form-label">Token</label>
+            <input type="text" class="form-control" id="checkoutInputToken" v-model="tokenCheckout">
+          </div>
+
+          <p class="text-black-50 text-break border border-primary p-2" v-if="checkoutRes">{{ checkoutRes }}</p>
+          <div class="mb-3 text-end">
+            <button type="button" class="btn btn-secondary" @click="checkout">Checkout</button>
+          </div>
+        </form>
+
+        <hr>
+
+        <form>
+          <h2 class="text-decoration-underline">登出</h2>
+          <div class="mb-3">
+            <label for="signOutInputToken" class="form-label">Token</label>
+            <input type="text" class="form-control" id="signOutInputToken" v-model="tokenSignOut">
+          </div>
+
+          <p class="text-black-50 text-break border border-primary p-2" v-if="signOutRes">{{ signOutRes }}</p>
+
+          <div class="mb-3 text-end">
+            <button type="button" class="btn btn-secondary" @click="signOut">Sign Out</button>
+          </div>
+        </form>
       </div>
 
-      <div class="col-6">
-        <h2>Todo-List</h2>
-        <div v-if="token">
-          <input class="input-group" type="text" placeholder="New Todo" v-model="newTodo">
-          <button type="button" class="btn btn-secondary" @click="addTodo">Add todo</button>
-          <div>
-            <ul v-for="(todo) in todos" v-bind:key="todo.id">
-              <li>
-                任務內容：{{ todo.content }} | 狀態：{{ todo.status ? "完成" : "未完成" }} |
-                <input class="input-group" type="text" v-model="todoEdit[todo.id]" placeholder="edit content">
-                <button type="button" class="btn btn-secondary" @click="deleteTodo(todo.id)">Delete</button>
-                <button type="button" class="btn btn-secondary" @click="updateTodo(todo.id)">Update</button>
-                <button type="button" class="btn btn-secondary" @click="toggleTodoStatus(todo.id)">Toggle Status</button>
-              </li>
-              <!-- | <input class="input-group" type="text" v-model="tod"> -->
-            </ul>
+      <div class="col-6 border-start">
+        <h2 class="text-decoration-underline">Todo-List</h2>
+
+        <div style="height: max-content;">
+
+          <form v-if="token">
+            <div class="mb-3">
+              <label for="todoInputNewTodo" class="form-label">New Todo</label>
+              <input type="text" class="form-control" id="todoInputNewTodo" v-model="newTodo">
+            </div>
+
+            <div class="mb-3 text-end">
+              <button type="button" class="btn btn-secondary" @click="addTodo">Add todo</button>
+            </div>
+
+            <hr>
+
+            <div>
+              <ul class="list-group list-group-flush" v-for="(todo) in todos" v-bind:key="todo.id">
+                <li class="list-group-item">
+                  <span class="fs-5">內容：{{ todo.content }} @{{ todo.createTime }}
+                    <span :style="!todo.status ? { 'color': 'red' } : { 'color': 'green' }">【{{ todo.status ? "完成" :
+                      "未完成" }}】 </span>
+                  </span>
+                  <input type="text" class="form-control" id="todoInputEditTodo" placeholder="Edit Todo"
+                    v-model="todoEdit[todo.id]">
+                  <div class="mb-3 text-end">
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                      @click="deleteTodo(todo.id)">Delete</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                      @click="updateTodo(todo.id)">Update</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                      @click="toggleTodoStatus(todo.id)">Toggle
+                      Status</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </form>
+
+          <div v-else>
+            <p class="text-black p-2">您尚未登入哦，請先登入並驗證才能使用該功能</p>
           </div>
 
         </div>
+
       </div>
     </div>
   </div>
@@ -137,7 +203,7 @@ const checkout = async () => {
         authorization: tokenCheckout.value
       }
     });
-    console.log(res);
+    // console.log(res);
 
     // user.value = res.data
     checkoutRes.value = `驗證成功, UID: ${res.data.uid}, Nickname: ${res.data.nickname}`
@@ -173,12 +239,14 @@ const signOut = async () => {
           authorization: tokenSignOut.value
         }
       });
-    console.log(res);
+    // console.log(res);
     signOutRes.value = res.data.message;
 
     tokenCheckout.value = ""
     tokenSignOut.value = ""
     token.value = ""
+
+    document.cookie = `hexschoolTodo=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
 
   } catch (error) {
     console.log(error)
@@ -201,6 +269,13 @@ const getTodos = async () => {
     })
     // console.log(res.data)
     todos.value = res.data.data
+
+    todos.value.forEach((todo, index) => {
+      todos.value[index] = {
+        ...todo,
+        "createTime": new Date(todo.createTime * 1000).toLocaleString()
+      }
+    })
     // console.log("todos:", todos.value)
 
   } catch (error) {
@@ -298,7 +373,7 @@ onMounted(() => {
     tokenCheckout.value = token.value
     checkout()
 
-    getTodos()
+    getTodos
   }
 });
 
