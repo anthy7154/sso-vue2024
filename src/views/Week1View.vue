@@ -46,42 +46,53 @@ const finishEdit = () => {
 </script>
 
 <template>
-  <h1>Vue week01 Homework</h1>
+  <div class="container">
+    <div class="row p-3">
+      <div class="col-12">
+        <h1>Vue week01 Homework</h1>
 
-  <table>
-    <thead>
-      <tr>
-        <th scope="col">編號</th>
-        <th scope="col">品項</th>
-        <th scope="col">描述</th>
-        <th scope="col">價格</th>
-        <th scope="col">庫存</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="item in menu" v-bind:key="item.id">
-        <td>{{ item.id }}</td>
-        <td v-on:dblclick="handleEdit(item.id)">{{ item.name }}</td>
-        <td><small>{{ item.description }}</small></td>
-        <td>{{ item.price }}</td>
-        <td>
-          <button type="button" v-on:click="updateStock(item, 'decrease')" v-bind:disabled="item.stock === 0">-</button>
-          {{ item.stock }}
-          <button type="button" v-on:click="updateStock(item, 'increase')">+</button>
-          <span v-if="item.stock === 0">已無庫存</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">編號</th>
+              <th scope="col">品項</th>
+              <th scope="col">描述</th>
+              <th scope="col">價格</th>
+              <th scope="col">庫存</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in menu" v-bind:key="item.id">
+              <th scope="row">{{ item.id }}</th>
+              <td v-on:dblclick="handleEdit(item.id)">{{ item.name }}</td>
+              <td><small>{{ item.description }}</small></td>
+              <td>{{ item.price }}</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-secondary" v-on:click="updateStock(item, 'decrease')"
+                  v-bind:disabled="item.stock === 0">-</button>
+                {{ item.stock }}
+                <button type="button" class="btn btn-sm btn-secondary"
+                  v-on:click="updateStock(item, 'increase')">+</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-  <p>滑鼠雙擊其一品項名稱，以編輯內容</p>
-  <div v-if="editable">
-    <hr>
-    <h2>編輯區域</h2>
-    <input type="text" name="" id="" v-model="tempItem.name">
-    <button type="button" v-on:click="finishEdit"
-      v-bind:disabled="tempItem.name === menu[tempItem.id].name || tempItem.name === ''">確認</button>
-    <button type="button" v-on:click="editable = false">取消</button>
+        <p class="alert alert-info" role="alert">
+          滑鼠雙擊其一品項名稱，以編輯內容
+        </p>
+
+        <div class="col-12" v-if="editable">
+
+          <hr>
+          <h2>編輯區域</h2>
+          <input type="text" class="form-control" name="" id="" v-model="tempItem.name">
+          <button type="button" class="btn btn-secondary" v-on:click="finishEdit"
+            v-bind:disabled="tempItem.name === menu[tempItem.id].name || tempItem.name === ''">確認</button>
+          <button type="button" class="btn btn-light" v-on:click="editable = false">取消</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </template>
