@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <div class="container">
+  <div class="container-fluid">
     <nav class="navbar navbar-light p-4" style="background-color: #e3f2fd;">
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/about">About</RouterLink>

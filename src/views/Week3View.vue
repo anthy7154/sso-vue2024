@@ -4,13 +4,14 @@
       <div class="row">
         <!-- 菜單 -->
         <div class="col-md-4">
-          <div class="list-group" v-for="item in data" :key="item.id">
-            <a href="#" class="list-group-item list-group-item-action">
+          <div class="list-group" v-for="drink in drinks" :key="drink.id">
+            <a href="#" class="list-group-item list-group-item-action" @click.prevent="addCart(drink.id)">
+              {{ drink.id }}
               <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">{{ item.name }}</h5>
-                <small>${{ item.price }}</small>
+                <h5 class="mb-1">{{ drink.name }}</h5>
+                <small>${{ drink.price }}</small>
               </div>
-              <p class="mb-1">{{ item.description }}</p>
+              <p class="mb-1">{{ drink.description }}</p>
             </a>
           </div>
         </div>
@@ -30,35 +31,26 @@
             </thead>
 
             <tbody>
-              <tr>
-                <td><button type="button" class="btn btn-sm">x</button></td>
-                <td>四季春茶</td>
-                <td><small>香醇四季春茶，回甘無比</small></td>
+              <tr v-for="item in cart" :key="item.id">
+                <td><button type="button" class="btn btn-sm" @click="removeCart(item.id)">x</button></td>
+                <td>{{ item.name }}</td>
+                <td><small>{{ item.description }}</small></td>
                 <td>
-                  <select class="form-select">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
+                  <select class="form-select" v-model="item.quantity">
+                    <option v-for="i in 10" :key="i" :value="i">{{ i }}</option>
                   </select>
                 </td>
-                <td>45</td>
-                <td>45</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.price * item.quantity }}</td>
               </tr>
             </tbody>
           </table>
           <div class="text-end mb-3">
-            <h5>總計: <span>$100</span></h5>
+            <h5>總計: <span>${{ sum }}</span></h5>
           </div>
-          <textarea class="form-control mb-3" rows="3" placeholder="備註"></textarea>
+          <textarea class="form-control mb-3" rows="3" placeholder="備註" v-model="orderNote"></textarea>
           <div class="text-end">
-            <button class="btn btn-primary">送出</button>
+            <button class="btn btn-primary" @click="newOrder()">送出</button>
           </div>
         </div>
       </div>
@@ -78,26 +70,16 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>翡翠檸檬</td>
-                      <td>7</td>
-                      <td>385</td>
-                    </tr>
-                    <tr>
-                      <td>冬瓜檸檬</td>
-                      <td>7</td>
-                      <td>315</td>
-                    </tr>
-                    <tr>
-                      <td>冬瓜檸檬</td>
-                      <td>4</td>
-                      <td>180</td>
+                    <tr v-for="item in order.cart" :key="item.id">
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.price * item.quantity }}</td>
                     </tr>
                   </tbody>
                 </table>
-                <div class="text-end">備註: <span>都不要香菜</span></div>
+                <div class="text-end">備註: <span>{{ order.orderNote }}</span></div>
                 <div class="text-end">
-                  <h5>總計: <span>$145</span></h5>
+                  <h5>總計: <span>${{ order.sum }}</span></h5>
                 </div>
               </div>
             </div>
@@ -109,8 +91,9 @@
 </template>
 
 <script setup>
+import { computed, ref } from 'vue';
 
-const data = [
+const drinks = ref([
   { "id": 1, "name": "珍珠奶茶", "description": "香濃奶茶搭配QQ珍珠", "price": 50 },
   { "id": 2, "name": "冬瓜檸檬", "description": "清新冬瓜配上新鮮檸檬", "price": 45 },
   { "id": 3, "name": "翡翠檸檬", "description": "綠茶與檸檬的完美結合", "price": 55 },
@@ -118,6 +101,44 @@ const data = [
   { "id": 5, "name": "阿薩姆奶茶", "description": "阿薩姆紅茶搭配香醇鮮奶", "price": 50 },
   { "id": 6, "name": "檸檬冰茶", "description": "檸檬與冰茶的清新組合", "price": 45 },
   { "id": 7, "name": "芒果綠茶", "description": "芒果與綠茶的獨特風味", "price": 55 },
-  { "id": 8, "name": "抹茶拿鐵", "description": "抹茶與鮮奶的絕配", "price": 60 }
-]
+  { "id": 8, "name": "抹茶拿鐵", "description": "抹茶與鮮奶的絕配", "price": 60 },
+])
+const cart = ref([])
+const order = ref({})
+const orderNote = ref("")
+const sum = computed(() => {
+  return cart.value.reduce((pre, cur) => {
+    return pre + (cur.price * parseInt(cur.quantity))
+  }, 0)
+})
+
+// 將品項加入購物車
+const addCart = (itemId) => {
+  const findDrink = drinks.value.findIndex(drink => drink.id === itemId)
+  cart.value.push({
+    ...drinks.value[findDrink],
+    "id": new Date().getTime(),
+    "quantity": 1
+  })
+  // console.log(cart.value)
+}
+
+// 將品項移出購物車
+const removeCart = (itemId) => {
+  // console.log(itemId)
+  cart.value = cart.value.filter(item => item.id !== itemId)
+}
+
+// 建立訂單
+const newOrder = () => {
+  order.value = {
+    cart: cart.value,
+    orderNote: orderNote.value,
+    id: new Date().getTime(),
+    sum: sum.value,
+  }
+  // 清空購物車及備註
+  cart.value = [];
+  orderNote.value = "";
+}
 </script>
