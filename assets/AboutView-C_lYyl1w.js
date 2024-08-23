@@ -1,1 +1,0 @@
-import{_ as s,c as o,o as t,a as e}from"./index-BZaw595c.js";const c={},a={class:"container"},n=e("div",{class:"about"},[e("h1",null,"This is an about page")],-1),_=[n];function r(i,d){return t(),o("div",a,_)}const u=s(c,[["render",r]]);export{u as default};
