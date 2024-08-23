@@ -28,6 +28,10 @@ const router = createRouter({
     {
       path: '/week3',
       component: () => import('../views/Week3View.vue')
+    },
+    {
+      path: '/week3-2',
+      component: () => import('../views/Week3View2.vue')
     }
   ]
 })
